@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Geographical Lead Scraping POC</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Production Modular Stylesheet -->
+  <link rel="stylesheet" href="/static/styles.css?v=3.2.2" />
+</head>
+
+<body>
+  <div class="container">
+    <!-- Top Navigation Header -->
+    <header class="top-bar">
+      <div class="brand-group">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-title">Dakini AI — <span>Geographical Lead Scraping & Autonomous Intelligence</span></div>
+          <div class="brand-subtitle">Location-Driven Autonomous Public-Web Discovery, Parallel Crawling & Multi-Metro
+            Verification Engine</div>
+        </div>
+      </div>
+      <div class="top-meta">
+        <button id="btnOpenCRMModal" class="status-badge" style="cursor: pointer; background: var(--violet-bg); color: #5b21b6; border: 1px solid var(--violet-btn); font-weight: 700; display: flex; align-items: center; gap: 6px;" type="button" onclick="openCRMModal()">
+          <span>🚀</span> CRM Export & Sync
+        </button>
+        <div class="status-badge">
+          <span id="systemLiveDot" class="pulse-dot"></span>
+          <span id="systemLiveText">Engine Online</span>
+        </div>
+        <div class="status-badge">
+          v2.5 Location Pro
+        </div>
+      </div>
+    </header>
+
+    <!-- Location Scope Control Bar (Location-First) -->
+    <section class="location-scope-panel">
+      <div class="location-scope-info">
+        <span class="location-pin-icon">📍</span>
+        <div>
+          <div class="location-title">
+            Active Market Scope: <span id="currentScopeTitle">Bhubaneswar, Odisha</span>
+          </div>
+          <div id="currentScopeSubtitle" class="location-subtext">
+            Displaying full business intelligence, verified phone leads & discovery data for this desired location.
+          </div>
+        </div>
+      </div>
+
+      <div class="location-mode-selector">
+        <button id="btnScopeLocationOnly" class="scope-toggle-btn active" type="button"
+          onclick="setScopeMode('location')">
+          📍 Desired Location View
+        </button>
+        <button id="btnScopeAllMetros" class="scope-toggle-btn" type="button" onclick="setScopeMode('all')">
+          🌐 All Metros Aggregate
+        </button>
+      </div>
+    </section>
+
+    <!-- Master Metric Cards (Adapts to Desired Location or All Metros) -->
+    <section class="metric-grid">
+      <!-- Card 1: Phone-Verified Leads in Location -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span id="card1Label" class="metric-label">Location Phone Leads</span>
+          <div class="metric-icon-wrap">📞</div>
+        </div>
+        <div id="quickPhoneCount" class="metric-value">...</div>
+        <div class="metric-actions">
+          <button id="btnViewMasterPhone" class="btn-action-sm btn-violet-solid" type="button">
+            View Leads
+          </button>
+          <a id="linkExportPhoneCsv" href="/api/export/phone-leads?city=Bhubaneswar"
+            class="btn-action-sm btn-violet-outline" download="bhubaneswar_leads_with_phone.csv">
+            CSV Export
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2: Qualified Leads in Location -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span id="card2Label" class="metric-label">Location Qualified</span>
+          <div class="metric-icon-wrap">🎯</div>
+        </div>
+        <div id="quickQualifiedCount" class="metric-value">...</div>
+        <div class="metric-actions">
+          <button id="btnViewMasterQualified" class="btn-action-sm btn-violet-solid" type="button">
+            View Leads
+          </button>
+          <a id="linkExportQualifiedCsv" href="/api/export/companies?city=Bhubaneswar"
+            class="btn-action-sm btn-violet-outline" download="bhubaneswar_companies_leads.csv">
+            CSV Export
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 3: Discovery Candidates in Location -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span id="card3Label" class="metric-label">Location Discovery</span>
+          <div class="metric-icon-wrap">🌐</div>
+        </div>
+        <div id="quickDiscoveryCount" class="metric-value">...</div>
+        <div class="metric-actions">
+          <button id="btnViewMasterDiscovery" class="btn-action-sm btn-violet-solid" type="button">
+            View Data
+          </button>
+          <a id="linkExportDiscoveryCsv" href="/api/export/discovery" class="btn-action-sm btn-violet-outline"
+            download="all_discovery_data.csv">
+            CSV Export
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 4: Master Multi-Sheet Excel -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Master Workbook</span>
+          <div class="metric-icon-wrap">📊</div>
+        </div>
+        <div class="metric-value"
+          style="font-size: 20px; line-height: 1.5; color: var(--text-black); font-weight: 800;">
+          6 Sheets Synced
+        </div>
+        <div class="metric-actions">
+          <a href="/api/export/excel" class="btn-action-sm btn-violet-solid" style="width: 100%;"
+            download="dakini_master_leads_and_discovery.xlsx">
+            Download Excel (.xlsx)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Targeted Scrape Form Workspace -->
+    <section class="card">
+      <form id="scrapeForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="city">Target City</label>
+            <input id="city" class="form-input" value="Bhubaneswar" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="state">State (Optional)</label>
+            <input id="state" class="form-input" placeholder="e.g. Odisha" value="Odisha" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="category">Industry Vertical</label>
+            <input id="category" class="form-input" value="Digital Marketing" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="limit">Target Lead Limit</label>
+            <input id="limit" class="form-input" type="number" min="1" max="10000" value="200" required />
+          </div>
+        </div>
+
+        <!-- Quick Pick Presets -->
+        <div class="preset-container">
+          <span class="preset-label">Quick Cities:</span>
+          <button type="button" class="preset-pill active"
+            onclick="selectPresetCity('Bhubaneswar', 'Odisha', this)">Bhubaneswar</button>
+          <button type="button" class="preset-pill"
+            onclick="selectPresetCity('Mumbai', 'Maharashtra', this)">Mumbai</button>
+          <button type="button" class="preset-pill"
+            onclick="selectPresetCity('Bengaluru', 'Karnataka', this)">Bengaluru</button>
+          <button type="button" class="preset-pill" onclick="selectPresetCity('Delhi', 'Delhi', this)">Delhi</button>
+          <button type="button" class="preset-pill"
+            onclick="selectPresetCity('Hyderabad', 'Telangana', this)">Hyderabad</button>
+          <button type="button" class="preset-pill"
+            onclick="selectPresetCity('Pune', 'Maharashtra', this)">Pune</button>
+          <button type="button" class="preset-pill"
+            onclick="selectPresetCity('Kolkata', 'West Bengal', this)">Kolkata</button>
+          <button type="button" class="preset-pill"
+            onclick="selectPresetCity('Chennai', 'Tamil Nadu', this)">Chennai</button>
+        </div>
+
+        <div class="preset-container">
+          <span class="preset-label">Quick Verticals:</span>
+          <button type="button" class="preset-pill active"
+            onclick="setPresetCategory('Digital Marketing', this)">Digital Marketing</button>
+          <button type="button" class="preset-pill" onclick="setPresetCategory('Real Estate', this)">Real
+            Estate</button>
+          <button type="button" class="preset-pill" onclick="setPresetCategory('Healthcare', this)">Healthcare</button>
+          <button type="button" class="preset-pill" onclick="setPresetCategory('Software Development', this)">Software
+            Development</button>
+          <button type="button" class="preset-pill" onclick="setPresetCategory('IT Services', this)">IT
+            Services</button>
+          <button type="button" class="preset-pill" onclick="setPresetCategory('Business Services', this)">Business
+            Services</button>
+          <button type="button" class="preset-pill" onclick="setPresetCategory('Travel', this)">Travel</button>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="filter-toggle-row">
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="phoneRequired" />
+            <span class="checkbox-text">Strictly prioritize & filter leads with verified phone numbers</span>
+          </label>
+          <div style="font-size: 13px; color: var(--text-black); font-weight: 800;">
+            ⚡ Parallel Multi-Threaded Crawler (Concurrency: 1-32)
+          </div>
+        </div>
+
+        <button id="submitButton" class="btn-submit-scrape" type="submit">
+          ⚡ Start Geographical Scrape for <span id="submitCityName">Bhubaneswar</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Status Banner -->
+    <div id="status" class="status-banner">
+      Ready. Enter a location and start a scrape, or select one of the location tabs below.
+    </div>
+
+    <!-- Live Scrape Metric Yield Stats -->
+    <div id="stats" class="stat-cards-row" style="display: none;"></div>
+
+    <!-- Dedicated Direct CSV Downloads for Scraped Location -->
+    <div id="runExportContainer" class="run-download-panel" style="display: none;">
+      <div class="run-download-header">Direct CSV Exports from this Run:</div>
+      <div class="run-download-bar">
+        <a id="runPhoneCsvLink" class="btn-action-sm btn-violet-solid" style="display: none;" download>
+          📞 Download Run Phone Leads (CSV)
+        </a>
+        <a id="runQualifiedCsvLink" class="btn-action-sm btn-violet-solid" style="display: none;" download>
+          🎯 Download Run Qualified Leads (CSV)
+        </a>
+        <a id="runDiscoveryCsvLink" class="btn-action-sm btn-violet-outline" style="display: none;" download>
+          🌐 Download Run Discovery All (CSV)
+        </a>
+        <button id="btnRunPushCRM" class="btn-action-sm btn-violet-solid" type="button" onclick="openCRMModal()">
+          🚀 Export Leads to CRM
+        </button>
+      </div>
+    </div>
+
+    <!-- Dataset Switcher Bar -->
+    <div class="dataset-switcher-bar">
+      <div class="switcher-pill-group">
+        <button id="tabPhoneLeads" class="tab-pill active-phone" type="button">
+          📞 Leads With Phone
+          <span id="phoneCountBadge" class="counter-badge">0</span>
+        </button>
+        <button id="tabQualifiedLeads" class="tab-pill" type="button">
+          🎯 Qualified Leads
+          <span id="qualifiedCountBadge" class="counter-badge">0</span>
+        </button>
+        <button id="tabAllDiscovery" class="tab-pill" type="button">
+          🌐 Discovery Candidates
+          <span id="discoveryCountBadge" class="counter-badge">0</span>
+        </button>
+      </div>
+
+      <input id="tableSearchInput" class="table-search-input" type="text"
+        placeholder="🔍 Filter rows by company, address, phone..." />
+    </div>
+
+    <!-- Master Results Table Container -->
+    <div id="resultsContainer"></div>
+  </div>
+
+  <!-- CRM Export & Integration Modal -->
+  <div id="crmModal" class="modal-overlay" style="display: none;" onclick="if(event.target===this) closeCRMModal()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="modal-header-title">
+            <span>🚀</span> Export Leads to Customer CRM
+          </div>
+          <div class="modal-header-subtitle">
+            Push city-specific leads directly to Universal Webhook, HubSpot, Zoho, or Custom REST endpoints.
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeCRMModal()">&times;</button>
+      </div>
+
+      <div class="modal-nav-tabs">
+        <button id="modalTabExport" class="modal-tab-btn active" type="button" onclick="switchCRMModalTab('export')">
+          📤 Export City Leads
+        </button>
+        <button id="modalTabDestinations" class="modal-tab-btn" type="button" onclick="switchCRMModalTab('destinations')">
+          ⚙️ Customer Destinations
+        </button>
+        <button id="modalTabLogs" class="modal-tab-btn" type="button" onclick="switchCRMModalTab('logs')">
+          📋 Export Audit Logs
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Tab 1: Export Leads View -->
+        <div id="crmTabContentExport">
+          <div class="crm-form-row">
+            <div>
+              <label class="crm-label" for="crmExportCity">Target City</label>
+              <input id="crmExportCity" class="crm-input" value="Bhubaneswar" />
+            </div>
+            <div>
+              <label class="crm-label" for="crmTargetMode">Dispatch Mode</label>
+              <select id="crmTargetMode" class="crm-select" onchange="toggleCRMTargetMode()">
+                <option value="destination">Pre-configured Customer Destination</option>
+                <option value="dynamic">One-off Webhook / Endpoint URL</option>
+                <option value="broadcast">Broadcast to All Matching Active Destinations</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pre-configured Destination Selector -->
+          <div id="crmGroupSavedDest" class="crm-form-row-full">
+            <label class="crm-label" for="crmDestSelect">Select Customer CRM Destination</label>
+            <select id="crmDestSelect" class="crm-select">
+              <option value="">Loading configured destinations...</option>
+            </select>
+          </div>
+
+          <!-- Dynamic One-Off Options -->
+          <div id="crmGroupDynamic" style="display: none;">
+            <div class="crm-form-row">
+              <div>
+                <label class="crm-label" for="crmDynamicUrl">Target Webhook / Endpoint URL</label>
+                <input id="crmDynamicUrl" class="crm-input" placeholder="https://customer-crm.com/api/v1/leads" />
+              </div>
+              <div>
+                <label class="crm-label" for="crmDynamicType">CRM Protocol Adapter</label>
+                <select id="crmDynamicType" class="crm-select">
+                  <option value="webhook">Universal Webhook (JSON)</option>
+                  <option value="hubspot">HubSpot Batch Companies API</option>
+                  <option value="zoho">Zoho CRM Leads API</option>
+                  <option value="generic_rest">Generic REST API</option>
+                </select>
+              </div>
+            </div>
+            <div class="crm-form-row-full">
+              <label class="crm-label" for="crmDynamicKey">API Key / Bearer Token (Optional)</label>
+              <input id="crmDynamicKey" class="crm-input" type="password" placeholder="e.g. pat-na1-..., zoho token, or custom bearer" />
+            </div>
+          </div>
+
+          <!-- Lead Filters -->
+          <div class="crm-form-row">
+            <div>
+              <label class="crm-label" for="crmExportLimit">Max Leads Limit</label>
+              <input id="crmExportLimit" class="crm-input" type="number" min="1" max="5000" value="100" />
+            </div>
+            <div style="display: flex; align-items: flex-end; padding-bottom: 8px;">
+              <label class="checkbox-wrap" style="cursor: pointer;">
+                <input type="checkbox" id="crmExportPhoneOnly" />
+                <span class="checkbox-text" style="font-weight: 600;">Export Phone-Verified Leads Only</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="crm-actions-bar">
+            <button id="btnTriggerCRMExport" class="btn-action-sm btn-violet-solid" style="padding: 10px 20px; font-size: 14px;" type="button" onclick="executeCRMExport()">
+              🚀 Send Leads to Customer CRM
+            </button>
+            <button id="btnTestCRMConnection" class="btn-action-sm btn-violet-outline" style="padding: 10px 16px; font-size: 14px;" type="button" onclick="executeCRMTestConnection()">
+              🔌 Test Ping
+            </button>
+          </div>
+
+          <div id="crmExportStatusBox" class="crm-status-box"></div>
+        </div>
+
+        <!-- Tab 2: Manage Destinations View -->
+        <div id="crmTabContentDestinations" style="display: none;">
+          <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-black);">
+            Add New Customer CRM Destination
+          </h4>
+          <div class="crm-form-row">
+            <div>
+              <label class="crm-label" for="newDestCustomerName">Customer / Client Name *</label>
+              <input id="newDestCustomerName" class="crm-input" placeholder="e.g. Acme Agency" required />
+            </div>
+            <div>
+              <label class="crm-label" for="newDestCrmType">CRM Integration Adapter</label>
+              <select id="newDestCrmType" class="crm-select">
+                <option value="webhook">Universal Webhook</option>
+                <option value="hubspot">HubSpot Batch API</option>
+                <option value="zoho">Zoho CRM</option>
+                <option value="generic_rest">Generic REST API</option>
+              </select>
+            </div>
+          </div>
+          <div class="crm-form-row">
+            <div>
+              <label class="crm-label" for="newDestUrl">Endpoint / Webhook URL *</label>
+              <input id="newDestUrl" class="crm-input" placeholder="https://api.customer.com/webhooks/leads" required />
+            </div>
+            <div>
+              <label class="crm-label" for="newDestCityFilter">City Scope Filter</label>
+              <input id="newDestCityFilter" class="crm-input" placeholder="e.g. Delhi, Mumbai (or * for all)" />
+            </div>
+          </div>
+          <div class="crm-form-row">
+            <div>
+              <label class="crm-label" for="newDestApiKey">API Key / Token (Optional)</label>
+              <input id="newDestApiKey" class="crm-input" type="password" placeholder="Bearer token or API key" />
+            </div>
+            <div style="display: flex; align-items: flex-end; padding-bottom: 8px;">
+              <label class="checkbox-wrap" style="cursor: pointer;">
+                <input type="checkbox" id="newDestAutoSync" checked />
+                <span class="checkbox-text" style="font-weight: 600;">Auto-sync when city scraper finishes</span>
+              </label>
+            </div>
+          </div>
+          <button class="btn-action-sm btn-violet-solid" style="padding: 8px 18px;" type="button" onclick="saveNewCRMDestination()">
+            + Register CRM Destination
+          </button>
+
+          <hr style="margin: 24px 0 16px; border: 0; border-top: 1px solid var(--border-light);" />
+
+          <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-black);">
+            Configured Customer Destinations
+          </h4>
+          <div id="crmDestinationsListContainer">Loading destinations...</div>
+        </div>
+
+        <!-- Tab 3: Audit Logs View -->
+        <div id="crmTabContentLogs" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--text-black);">
+              Recent Outbound CRM Dispatch Logs
+            </h4>
+            <button class="btn-action-sm btn-violet-outline" type="button" onclick="loadCRMLogs()">
+              🔄 Refresh Logs
+            </button>
+          </div>
+          <div id="crmLogsContainer">Loading logs...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Production Modular JavaScript Application -->
+  <script src="/static/app.js?v=3.2.2"></script>
+</body>
+
+</html>
